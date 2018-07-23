@@ -91,6 +91,22 @@ func doPrestart() {
 		// Not a GPU container, nothing to do.
 		return
 	}
+	// check gpu dev exists
+	if path, err := exec.LookPath("lspci"); err == nil {
+		if out, err := exec.Command(path).Output(); err == nil {
+			out_str := strings.Split(string(out[:]), "\n")
+			no_gpu := true
+			for _, line := range out_str {
+				if strings.Contains(line, "NVIDIA") {
+					no_gpu = false
+					break
+				}
+			}
+			if no_gpu {
+				return
+			}
+		}
+	}
 
 	rootfs := getRootfsPath(container)
 
